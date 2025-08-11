@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QGBx Playground — Sand & Sea Theme</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --sand:#f0d48a;
+      --sand-dark:#e1bf63;
+      --sea:#0b74a5;
+      --accent:#d95b3b;
+      --card-bg: rgba(255,255,255,0.9);
+      --glass: rgba(255,255,255,0.6);
+      --muted:#6b6b6b;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{height:100%; margin:0; background: linear-gradient(180deg, #fff7e0 0%, var(--sand) 35%, #f2c67a 60%); color:#111;}
+    .header{
+      display:flex; align-items:center; gap:1rem; padding:18px 28px; background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(255,255,255,0.08) 100%);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .logo{
+      display:flex; gap:14px; align-items:center;
+    }
+    .logo img{height:72px; width:auto; border-radius:8px; box-shadow: 0 6px 18px rgba(0,0,0,0.12);}
+    .brand{
+      font-weight:700; font-size:18px; letter-spacing:0.4px;
+    }
+    .subtitle{color:var(--muted); font-size:13px;}
+    .container{
+      max-width:1200px; margin:26px auto; display:grid; grid-template-columns: 380px 1fr; gap:20px; padding:0 18px;
+    }
+
+    /* control panel */
+    .panel{
+      background: var(--card-bg); border-radius:14px; padding:18px; box-shadow: 0 10px 30px rgba(18,18,18,0.06);
+    }
+    .panel h3{margin:0 0 8px 0;}
+    .field{margin:10px 0; display:flex; flex-direction:column; gap:6px;}
+    label{font-size:13px; color:#333;}
+    select,input[type="number"],input[type="text"]{
+      padding:8px 10px; border-radius:8px; border:1px solid rgba(0,0,0,0.08); font-size:14px;
+    }
+    .row{display:flex; gap:8px;}
+    .small{flex:1; min-width:0;}
+    .btn{
+      background:linear-gradient(180deg,var(--accent),#b7452e); color:white; border:0; padding:10px 12px; border-radius:10px; cursor:pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12); font-weight:600;
+    }
+    .btn.secondary{background:transparent; color:var(--accent); border:1px solid rgba(0,0,0,0.06); font-weight:600;}
+    .muted{color:var(--muted); font-size:13px;}
+
+    /* main panel */
+    .main-grid{display:grid; grid-template-rows: auto auto 1fr; gap:16px;}
+    .card{
+      background:var(--card-bg); border-radius:12px; padding:14px; box-shadow: 0 8px 22px rgba(18,18,18,0.05);
+    }
+
+    /* chart area */
+    .chart-wrap{display:flex; gap:14px; align-items:flex-start;}
+    .chart-canvas{flex:1; min-height:260px;}
+    .side-info{width:260px; display:flex; flex-direction:column; gap:8px;}
+
+    /* analyzer table */
+    table {width:100%; border-collapse:collapse; font-size:13px;}
+    th,td{padding:8px 6px; text-align:left; border-bottom:1px dashed rgba(0,0,0,0.04);}
+    th{color:var(--muted); font-weight:600; font-size:12px;}
+
+    footer{max-width:1200px;margin:20px auto; padding:16px; color:var(--muted); text-align:center; font-size:13px;}
+    .kicker{display:inline-block; padding:6px 10px; background:var(--glass); border-radius:999px; font-size:12px; margin-bottom:8px;}
+    .chip{display:inline-block;font-size:12px;padding:6px 10px;border-radius:10px;background:rgba(11,116,165,0.08);color:var(--sea);border:1px solid rgba(11,116,165,0.08)}
+    .export-row{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+    .notes{font-size:13px;color:var(--muted); margin-top:6px;}
+    @media (max-width:980px){
+      .container{grid-template-columns: 1fr; padding:10px;}
+      .side-info{width:100%;}
+      .chart-wrap{flex-direction:column;}
+      .logo img{height:54px;}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <!-- use the header image path you provided. If it doesn't load change src to your hosted path -->
+      <img src="/mnt/data/QGBx_Header.png" alt="QGBx header" onerror="this.style.display='none'"/>
+      <div>
+        <div class="brand">QGBx — Interactive Playground</div>
+        <div class="subtitle">Simulate Distributions • Visualize Measured vs Ideal • Analyze metrics</div>
+      </div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:12px;align-items:center">
+      <div class="chip">Theme: Sand & Sea</div>
+      <div class="muted">Frontend-only demo</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- left control panel -->
+    <section class="panel">
+      <h3>Device & Generator</h3>
+
+      <div class="field">
+        <label for="device">Device</label>
+        <select id="device">
+          <option value="PennylanDefaultQubit">PennylanDefaultQubit (simulator)</option>
+          <option value="QiskitAerSimulator">QiskitAerSimulator (simulator)</option>
+          <option value="QiskitFakeTorino">QiskitFakeTorino (noisy)</option>
+          <option value="IBM_Torino">IBM_Torino (real device)</option>
+        </select>
+      </div>
+
+      <div class="field row">
+        <div class="small">
+          <label for="shots">Shots</label>
+          <input id="shots" type="number" min="1" value="1000" />
+        </div>
+        <div class="small">
+          <label for="optlevel">Optimization</label>
+          <select id="optlevel">
+            <option value="0">0</option>
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+      </div>
+
+      <hr style="border:none;height:1px;background:rgba(0,0,0,0.04);margin:12px 0">
+
+      <h3>Distribution</h3>
+      <div class="field">
+        <label for="distribution">Type</label>
+        <select id="distribution">
+          <option value="Gaussian">Gaussian</option>
+          <option value="Exponential">Exponential</option>
+          <option value="HadamardQW">Hadamard_QW</option>
+          <option value="PegControlled">PegControlled</option>
+          <option value="GaussianOp">GaussianOp</option>
+          <option value="ExponentialOp">ExponentialOp</option>
+        </select>
+      </div>
+
+      <div id="paramsArea">
+
+        <!-- Gaussian params -->
+        <div class="field param param-Gaussian">
+          <label>p (binomial bias)</label>
+          <input id="param_p" type="number" min="0" max="1" step="0.01" value="0.5"/>
+        </div>
+
+        <!-- Exponential params -->
+        <div class="field param param-Exponential" style="display:none;">
+          <label>rate (λ)</label>
+          <input id="param_rate" type="number" min="0.01" step="0.01" value="0.5"/>
+        </div>
+
+        <!-- HadamardQW -->
+        <div class="field param param-HadamardQW" style="display:none;">
+          <label>Type</label>
+          <select id="param_qwtype">
+            <option value="Symmetric">Symmetric</option>
+            <option value="Asymmetric_Right">Asymmetric_Right</option>
+            <option value="Asymmetric_Left">Asymmetric_Left</option>
+          </select>
+        </div>
+
+        <!-- PegControlled: allow target or random -->
+        <div class="field param param-PegControlled" style="display:none;">
+          <label>Control Mode</label>
+          <select id="peg_mode">
+            <option value="random">random peg probs</option>
+            <option value="target">target vector (comma-separated)</option>
+          </select>
+          <input id="peg_target" type="text" placeholder="e.g. 0.01,0.03,0.1,..." style="margin-top:8px;display:none"/>
+        </div>
+
+        <!-- common -->
+        <div class="field">
+          <label>n_layers</label>
+          <input id="n_layers" type="number" min="1" max="12" value="6"/>
+          <div class="muted">Number of layers in the Galton board (higher -> more bins)</div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <button id="btnGenerate" class="btn">Generate Circuit</button>
+        <button id="btnRun" class="btn secondary">Run</button>
+      </div>
+
+      <div class="notes">
+        <strong>Note:</strong> This frontend simulates results locally. To use the real QGBx engine, replace <code>mockRun()</code> calls with a backend API that invokes the Python package and returns: measured, ideal arrays.
+      </div>
+      <div style="height:14px"></div>
+
+      <h3>Exports</h3>
+      <div class="export-row">
+        <button id="btnExportCircuit" class="btn secondary">Export Circuit PNG</button>
+        <button id="btnExportQASM" class="btn secondary">Export QASM</button>
+        <button id="btnExportCSV" class="btn secondary">Export CSV</button>
+      </div>
+
+    </section>
+
+    <!-- right main area -->
+    <section class="main-grid">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <h3 style="margin:0">Measured vs Ideal</h3>
+            <div class="muted">Shows the measured distribution (bars) vs ideal theoretical (line)</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div class="muted">Shots:</div>
+            <div id="shotsLabel" class="kicker">1000</div>
+          </div>
+        </div>
+
+        <div class="chart-wrap" style="margin-top:12px">
+          <div class="chart-canvas card">
+            <canvas id="distChart"></canvas>
+          </div>
+
+          <aside class="side-info card">
+            <div>
+              <strong>Generator</strong>
+              <div class="muted" id="generatorSummary">Not generated yet</div>
+            </div>
+
+            <div>
+              <strong>Last job</strong>
+              <div class="muted" id="jobId">—</div>
+            </div>
+
+            <div>
+              <strong>Controls</strong>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button id="btnToggleIdeal" class="btn secondary">Toggle Ideal</button>
+                <button id="btnReset" class="btn secondary">Reset</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 10px 0">Analyzer</h3>
+        <div class="muted">Computed metrics comparing ideal and measured</div>
+        <div style="margin-top:12px; overflow:auto;">
+          <table id="analysisTable" aria-live="polite">
+            <thead>
+              <tr><th>Metric</th><th>Value</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Total Variation Distance (TVD)</td><td id="tvdVal">—</td><td id="tvdPass">—</td></tr>
+              <tr><td>Jensen-Shannon Divergence (JSD)</td><td id="jsdVal">—</td><td id="jsdPass">—</td></tr>
+              <tr><td>Chi-Squared</td><td id="chiVal">—</td><td id="chiPass">—</td></tr>
+              <tr><td>Hellinger Distance</td><td id="hellVal">—</td><td id="hellPass">—</td></tr>
+              <tr><td>Entropy Difference</td><td id="entVal">—</td><td id="entPass">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="flex:1">
+          <h3 style="margin-top:0">Log / Output</h3>
+          <pre id="log" style="white-space:pre-wrap; max-height:220px; overflow:auto; background:rgba(0,0,0,0.03);padding:12px;border-radius:8px;"></pre>
+        </div>
+
+        <div style="width:260px">
+          <h4 style="margin:0">Quick Tips</h4>
+          <ul style="margin-top:8px;color:var(--muted);font-size:13px">
+            <li>Try n_layers 4–8 for fast runs.</li>
+            <li>PegControlled accepts a comma list of target probs matching final bins.</li>
+            <li>Click Export Circuit to download a placeholder SVG — backend can provide real image.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>QGBx Playground • Frontend demo — replace mock endpoints with your Python backend to run real QGBx circuits.</div>
+  </footer>
+
+  <script>
+    // ---------- Utilities
+    const el = id => document.getElementById(id);
+    const log = (s)=> { const box = el('log'); box.textContent = (new Date()).toLocaleTimeString() + " — " + s + "\\n" + box.textContent; };
+
+    // Chart setup
+    const ctx = el('distChart').getContext('2d');
+    let distChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [
+          { label: 'Measured', data: [], backgroundColor: 'rgba(11,116,165,0.55)', borderRadius:6 },
+          { label: 'Ideal', data: [], type: 'line', borderColor: 'rgba(217,91,59,0.9)', tension:0.2, borderWidth:2, pointRadius:3, fill:false }
+        ]
+      },
+      options: {
+        responsive:true,
+        interaction: { mode:'index', intersect:false },
+        scales: {
+          x: { title: { display:true, text: 'Bin' } },
+          y: { title: { display:true, text: 'Probability' }, min:0 }
+        },
+        plugins:{ legend:{ position:'top' } }
+      }
+    });
+
+    // ---------- Parameter handling
+    const distributionSelect = el('distribution');
+    const params = document.querySelectorAll('.param');
+    function showParamsFor(type){
+      params.forEach(p => p.style.display = 'none');
+      const matches = document.querySelectorAll('.param-' + type);
+      matches.forEach(m => m.style.display = '');
+    }
+    distributionSelect.addEventListener('change', ()=>{
+      showParamsFor(distributionSelect.value);
+    });
+    // init
+    showParamsFor(distributionSelect.value);
+
+    // shots label
+    el('shots').addEventListener('input', ()=> el('shotsLabel').textContent = el('shots').value);
+
+    // peg target toggle
+    el('peg_mode').addEventListener('change', (e)=> {
+      el('peg_target').style.display = e.target.value === 'target' ? 'block' : 'none';
+    });
+
+    // ---------- Mock generator / circuit creation
+    let lastGen = null;
+    el('btnGenerate').addEventListener('click', ()=>{
+      const config = readConfig();
+      lastGen = {
+        id: 'GEN-' + Math.random().toString(36).slice(2,9),
+        config,
+        generatedAt: new Date().toISOString()
+      };
+      el('generatorSummary').textContent = `${config.distribution} • layers=${config.n_layers} • device=${config.device}`;
+      log('Generator created: ' + lastGen.id + ' — ' + JSON.stringify(config));
+      el('jobId').textContent = '—';
+    });
+
+    // ---------- Run (mock or call backend)
+    el('btnRun').addEventListener('click', async ()=>{
+      const config = readConfig();
+      if(!lastGen){ lastGen = {id:'GEN-local', config}; el('generatorSummary').textContent = 'Auto-generated'; }
+      log('Starting run for ' + (lastGen.id || 'GEN-local'));
+      // SHOW progress
+      el('jobId').textContent = 'running...';
+      // If you have a real backend, swap mockRun() with fetch() to your API endpoint returning measured+ideal arrays.
+      const {measured, ideal} = await mockRun(config);
+      el('jobId').textContent = 'JOB-' + Math.random().toString(36).slice(2,9);
+
+      updateChart(measured, ideal);
+      runAnalysis(ideal, measured);
+      log('Run completed. Shots: ' + config.shots);
+    });
+
+    // ---------- Exports (placeholder)
+    el('btnExportCircuit').addEventListener('click', ()=>{
+      const svg = createCircuitSVG();
+      const blob = new Blob([svg], {type:'image/svg+xml'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'qgbx_circuit.svg'; a.click();
+      URL.revokeObjectURL(url);
+      log('Exported circuit SVG (placeholder).');
+    });
+
+    el('btnExportQASM').addEventListener('click', ()=>{
+      const qasm = `// QASM placeholder generated by QGBx-frontend\\n// Replace with backend export\\nOPENQASM 2.0;\\n// ...`;
+      const blob = new Blob([qasm], {type:'text/plain'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'circuit.qasm'; a.click();
+      log('Exported QASM placeholder.');
+    });
+
+    el('btnExportCSV').addEventListener('click', ()=>{
+      const labels = distChart.data.labels;
+      const measured = distChart.data.datasets[0].data;
+      const ideal = distChart.data.datasets[1].data;
+      let csv = 'bin,measured,ideal\\n';
+      for(let i=0;i<labels.length;i++) csv += `${labels[i]},${measured[i]},${ideal[i]}\\n`;
+      const blob = new Blob([csv], {type:'text/csv'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'distribution.csv'; a.click();
+      log('Exported CSV.');
+    });
+
+    el('btnToggleIdeal').addEventListener('click', ()=>{
+      const ds = distChart.data.datasets[1];
+      ds.hidden = !ds.hidden;
+      distChart.update();
+    });
+
+    el('btnReset').addEventListener('click', ()=>{
+      distChart.data.labels = [];
+      distChart.data.datasets[0].data = [];
+      distChart.data.datasets[1].data = [];
+      distChart.update();
+      el('log').textContent = '';
+      el('generatorSummary').textContent = 'Not generated yet';
+      el('jobId').textContent = '—';
+    });
+
+    // ---------- Read UI config
+    function readConfig(){
+      const d = distributionSelect.value;
+      const cfg = {
+        device: el('device').value,
+        shots: Number(el('shots').value),
+        optlevel: Number(el('optlevel').value),
+        distribution: d,
+        n_layers: Number(el('n_layers').value),
+        params: {}
+      };
+      if(d === 'Gaussian') cfg.params.p = Number(el('param_p').value);
+      if(d === 'Exponential') cfg.params.rate = Number(el('param_rate').value);
+      if(d === 'HadamardQW') cfg.params.type = el('param_qwtype').value;
+      if(d === 'PegControlled'){
+        const mode = el('peg_mode').value;
+        if(mode === 'target'){
+          const txt = el('peg_target').value.trim();
+          const arr = txt ? txt.split(',').map(x=>Number(x.trim())).filter(x=>!isNaN(x)) : [];
+          cfg.params.target = arr;
+        } else {
+          cfg.params.random = true;
+        }
+      }
+      return cfg;
+    }
+
+    // ---------- Mock run logic (generate measured and ideal arrays)
+    // This simulates binomial -> gaussian-like, exponential, and a "quantum-like" Hadamard QW (wider tails).
+    async function mockRun(cfg){
+      // simulate processing delay
+      await new Promise(r=>setTimeout(r, 700 + Math.random()*900));
+
+      const nLayers = Math.max(1, cfg.n_layers);
+      const nBins = nLayers + 1;
+
+      // generate ideal distribution depending on type
+      let ideal = new Array(nBins).fill(0);
+      if(cfg.distribution === 'Gaussian' || cfg.distribution === 'GaussianOp'){
+        // binomial with parameter p
+        const p = (cfg.params.p !== undefined) ? cfg.params.p : 0.5;
+        // binomial PMF
+        for(let k=0;k<nBins;k++){
+          ideal[k] = binomialPMF(nLayers,k,p);
+        }
+      } else if(cfg.distribution === 'Exponential' || cfg.distribution === 'ExponentialOp'){
+        const rate = (cfg.params.rate !== undefined) ? cfg.params.rate : 0.5;
+        // exponential-like over bins (normalized)
+        let sum=0;
+        for(let k=0;k<nBins;k++){ ideal[k] = Math.exp(-rate * k); sum+=ideal[k]; }
+        for(let k=0;k<nBins;k++) ideal[k] /= sum;
+      } else if(cfg.distribution === 'HadamardQW'){
+        // create a distribution with sharper peaks at edges using simple model
+        let sum=0;
+        for(let k=0;k<nBins;k++){
+          const distFactor = (1 - Math.cos(Math.PI * (k/(nBins-1))*2 )) * (0.5 + (k/(nBins-1)));
+          ideal[k] = Math.abs(Math.sin(k + 0.3))*distFactor + 0.1;
+          sum += ideal[k];
+        }
+        for(let k=0;k<nBins;k++) ideal[k] /= sum;
+      } else if(cfg.distribution === 'PegControlled'){
+        if(cfg.params.target && cfg.params.target.length === nBins){
+          ideal = cfg.params.target.slice();
+          // normalize if not normalized
+          let s = ideal.reduce((a,b)=>a+b,0);
+          if(s <= 0) { ideal = ideal.map(_=>1/nBins); s = 1; }
+          ideal = ideal.map(x=>x/s);
+        } else {
+          // random but smooth
+          let arr = [];
+          for(let k=0;k<nBins;k++) arr[k] = 0.2 + Math.random() * (1 + (k/nBins));
+          const s = arr.reduce((a,b)=>a+b,0);
+          ideal = arr.map(x=>x/s);
+        }
+      } else {
+        // default uniform
+        ideal = new Array(nBins).fill(1/nBins);
+      }
+
+      // Simulate measured by sampling with shots and some noise (and perhaps noise model for fake torino)
+      const measured = sampleFromDistribution(ideal, cfg.shots, cfg.device === 'QiskitFakeTorino' ? 0.07 : 0.02);
+
+      return {measured, ideal};
+    }
+
+    // ---------- Helpers: binomial PMF and sampling
+    function binomialPMF(n,k,p){
+      return choose(n,k) * Math.pow(p,k) * Math.pow(1-p, n-k);
+    }
+    // exact choose nCk
+    function choose(n,k){
+      k = Math.max(0, Math.min(k, n));
+      let res = 1;
+      for(let i=1;i<=k;i++){
+        res = res * (n - (k - i)) / i;
+      }
+      return Math.round(res * 1e12) / 1e12;
+    }
+
+    function sampleFromDistribution(probArr, shots, noiseStd=0.02){
+      // add gaussian noise to probabilities (simulating measurement noise/transpilation) and renormalize,
+      // then sample counts and return normalized frequencies (one-hot style probabilities)
+      const n = probArr.length;
+      let noisy = new Array(n);
+      for(let i=0;i<n;i++){
+        const jitter = randNormal(0, noiseStd);
+        noisy[i] = probArr[i] + jitter;
+      }
+      // clamp
+      for(let i=0;i<n;i++){ if(noisy[i] < 0) noisy[i] = 0; }
+      const s = noisy.reduce((a,b)=>a+b,0) || 1;
+      noisy = noisy.map(x => x / s);
+      // multinomial draw
+      const counts = new Array(n).fill(0);
+      for(let i=0;i<shots;i++){
+        const r = Math.random();
+        let cum = 0;
+        for(let j=0;j<n;j++){
+          cum += noisy[j];
+          if(r <= cum){ counts[j]++; break; }
+        }
+      }
+      return counts.map(c => c / shots);
+    }
+
+    function randNormal(mean=0, std=1){
+      // Box-Muller
+      let u = 0, v = 0;
+      while(u === 0) u = Math.random();
+      while(v === 0) v = Math.random();
+      const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+      return z * std + mean;
+    }
+
+    // ---------- Chart update
+    function updateChart(measured, ideal){
+      const n = measured.length;
+      distChart.data.labels = Array.from({length:n}, (_,i)=> String(i));
+      distChart.data.datasets[0].data = measured.map(x => +(x.toFixed(6)));
+      distChart.data.datasets[1].data = ideal.map(x => +(x.toFixed(6)));
+      distChart.update();
+    }
+
+    // ---------- Analyzer: compute metrics (careful arithmetic step-by-step)
+    function runAnalysis(ideal, measured, thresholds=[0.02, 0.05, 0.1, 0.1, 0.05]){
+      // ensure arrays same length
+      const n = Math.max(ideal.length, measured.length);
+      const p = new Array(n).fill(0), q = new Array(n).fill(0);
+      for(let i=0;i<n;i++){ p[i] = ideal[i] || 0; q[i] = measured[i] || 0; }
+      // normalize defensively
+      const sp = p.reduce((a,b)=>a+b,0) || 1; for(let i=0;i<n;i++) p[i] /= sp;
+      const sq = q.reduce((a,b)=>a+b,0) || 1; for(let i=0;i<n;i++) q[i] /= sq;
+
+      // TVD = 0.5 * sum |p - q|
+      let sumAbs = 0;
+      for(let i=0;i<n;i++){ sumAbs += Math.abs(p[i] - q[i]); }
+      const tvd = 0.5 * sumAbs;
+
+      // JSD: sqrt( 0.5 * KL(p || m) + 0.5 * KL(q || m) )  (we'll compute divergence value without sqrt optionally)
+      const m = new Array(n);
+      for(let i=0;i<n;i++) m[i] = 0.5 * (p[i] + q[i]);
+      const kl = (a,b) => {
+        let s = 0;
+        for(let i=0;i<n;i++){
+          if(a[i] <= 0) continue;
+          if(b[i] <= 0) { s += 1e6; continue; } // penalize
+          s += a[i] * Math.log(a[i] / b[i]);
+        }
+        return s;
+      };
+      const jsd_val = 0.5 * (kl(p,m) + kl(q,m));
+      const jsd = Math.log2 ? (jsd_val / Math.LN2) : jsd_val; // convert nat->bits using /ln2
+      // But common definition is base-2, so above converts nats->bits.
+
+      // Chi-squared: sum ((observed - expected)^2 / expected)
+      // use expected = p * shots, observed = q * shots
+      const shots = Number(el('shots').value) || 1000;
+      let chi = 0;
+      for(let i=0;i<n;i++){
+        const expected = Math.max(1e-8, p[i] * shots);
+        const observed = q[i] * shots;
+        const diff = observed - expected;
+        chi += (diff * diff) / expected;
+      }
+
+      // Hellinger distance: H(p,q) = (1/sqrt(2)) * sqrt( sum ( sqrt(p_i) - sqrt(q_i) )^2 )
+      let sumH = 0;
+      for(let i=0;i<n;i++){
+        const v = Math.sqrt(p[i]) - Math.sqrt(q[i]);
+        sumH += v * v;
+      }
+      const hell = (1/Math.SQRT2) * Math.sqrt(sumH);
+
+      // Shannon entropy difference: |H(p) - H(q)| (base 2)
+      const shannon = (arr) => {
+        let s = 0;
+        for(let i=0;i<arr.length;i++){
+          const v = arr[i];
+          if(v <= 0) continue;
+          s -= v * (Math.log(v) / Math.log(2));
+        }
+        return s;
+      };
+      const entDiff = Math.abs(shannon(p) - shannon(q));
+
+      // update UI
+      el('tvdVal').textContent = tvd.toFixed(6);
+      el('jsdVal').textContent = jsd.toExponential(6);
+      el('chiVal').textContent = chi.toFixed(4);
+      el('hellVal').textContent = hell.toFixed(6);
+      el('entVal').textContent = entDiff.toFixed(6);
+
+      // pass/fail using thresholds param order [tvd, jsd, chi, hell, ent]
+      el('tvdPass').textContent = tvd <= thresholds[0] ? 'PASS' : 'FAIL';
+      el('jsdPass').textContent = jsd <= thresholds[1] ? 'PASS' : 'FAIL';
+      el('chiPass').textContent = chi <= thresholds[2] * shots ? 'PASS' : 'FAIL';
+      el('hellPass').textContent = hell <= thresholds[3] ? 'PASS' : 'FAIL';
+      el('entPass').textContent = entDiff <= thresholds[4] ? 'PASS' : 'FAIL';
+    }
+
+    // ---------- small helper to generate a placeholder SVG for a circuit
+    function createCircuitSVG(){
+      const cfg = lastGen ? lastGen.config : readConfig();
+      const n = cfg.n_layers;
+      const width = 1200, height = Math.min(200 + n*18, 1000);
+      const rectW = width - 40;
+      const rows = n + 1;
+      // build simple svg visually representing layers and pegs
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`;
+      svg += `<rect x="0" y="0" width="${width}" height="${height}" fill="#fff8f0"/>`;
+      svg += `<text x="20" y="30" style="font-family:Inter,Arial;font-size:18px;fill:#333">QGBx Circuit — ${cfg.distribution} — ${new Date().toLocaleString()}</text>`;
+      for(let i=0;i<rows;i++){
+        const y = 60 + i*18;
+        svg += `<line x1="40" y1="${y}" x2="${width-40}" y2="${y}" stroke="#e2c78d" stroke-width="2" />`;
+      }
+      // pegs
+      for(let layer=0;layer<n;layer++){
+        const y = 60 + (layer+0.5)*18;
+        for(let j=0;j<=layer;j++){
+          const x = 60 + (rectW-40) * (j/(layer+1));
+          svg += `<circle cx="${x}" cy="${y}" r="4" fill="#d95b3b" />`;
+        }
+      }
+      svg += `</svg>`;
+      return svg;
+    }
+
+    // ---------- small math utils
+    // (already implemented above in choose)
+    // ---------------------
+
+    // Initial demo run to populate chart
+    (async function initialDemo(){
+      log('Welcome to QGBx Playground — demo run starting.');
+      const cfg = readConfig();
+      const res = await mockRun(cfg);
+      updateChart(res.measured, res.ideal);
+      runAnalysis(res.ideal, res.measured);
+      el('jobId').textContent = 'demo';
+    })();
+
+  </script>
+</body>
+</html>
