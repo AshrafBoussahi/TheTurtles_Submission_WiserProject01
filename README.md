@@ -74,7 +74,7 @@ For this, we have summarized our work into a draft that can be published as a pr
 
 ### Installation
 
-For the following tasks, we used our package **QGBx**. You can find its source code included within the submission files here, or on its main GitHub page.
+For the following tasks, we used our package **QGBx**. You can find its source code included within the submission files [here](./QGBx), or on its main GitHub page.
 
 You can download it using the following command:
 
