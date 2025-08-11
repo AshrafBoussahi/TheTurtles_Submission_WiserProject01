@@ -32,7 +32,25 @@ Thank you for reviewing our work. Enjoy reading :)))
 </p>
 
 ---
-## Summary & Content
+## What have The_Turtles done in "Project01"? 🐢
+
+- Created **QGBx**, a **Python package** for multi-dimensional variational Quantum Galton Boards.
+
+- Generalized the original circuit to support **any number of layers** (`n_layers`).
+
+- Enabled simulation of **Gaussian-like, Exponential, and Hadamard Quantum Walk distributions** with customizable distribution parameters.
+
+- Designed a **novel circuit architecture** that cuts qubit use nearly in half and reduces circuit depth, improving noisy-device performance.
+
+- Extended the approach to **3D Quantum Galton Boards** simulating 3D Normal and Hadamard distributions.
+
+- Added **variational methods** to find optimal parameters for target distributions.
+  
+- Summarized all our findings into a research-paper-like file
+
+
+---
+## Summary & Content of the Project 🐢
 
 In this work, we took the challenge to another level by trying to extract the maximum benefit from it. Since the main goal of this project is **purely educational**, we aimed to gather the necessary knowledge about Monte Carlo Simulations using Quantum Galton Boards, simplify it, and make it accessible—so even a turtle can do its own **Quantum Galton Board eXperiments!**
 
@@ -42,15 +60,18 @@ The challenge in this project was to implement and generalize a Quantum Galton B
 
 Even though the results of that circuit architecture and logic (the one introduced in that paper) show good theoretical results, it becomes impractical when increasing the number of layers of the Galton board (which is necessary to approximate discrete probability distributions to their continuous counterparts). Its architecture is very sensitive when run on noisy/real devices (which is the case for most current quantum devices in the NISQ era) because it mainly uses a lot of Fredkin (CSWAP) and CNOT gates, which are the best friends of noise :)
 
-For this, we have **designed a novel algorithm** (which can be critiqued and is novel to the knowledge of the authors) that uses the same logic from the USS paper of the Galton board and the one-hot encoded states (the input ball should appear in only one of the output bins), but uses a different architecture. We were able to o**ptimize the number of qubits required to nearly half**, and **reduce the depth of the circuit after transpilation a lot**, which helps us achieve **good to excellent results on noisy simulations!**
+For this, we have **designed a novel algorithm** (which can be critiqued and is novel to the knowledge of the authors) that uses the same logic from the USS paper of the Galton board and the one-hot encoded states (the input ball should appear in only one of the output bins), but uses a different architecture. We were able to **Optimize the number of qubits required to nearly half**, and **reduce the depth of the circuit after transpilation a lot**, which helps us achieve **good to excellent results on noisy simulations!**
 
 We have also generalized and proved that the architecture from the USS paper can produce **3D distributions using 3D Quantum Galton Board**, which successfully simulates a discrete Normal Distribution and Hadamard Quantum Walk in **3D space!** (although not yet included in the package, its approach can be found in this submission)
 
 Our package also includes **several variational (numerical) methods** that help deduce the right parameters for the Quantum Galton Board to simulate different statistical distributions, giving the user the **ability to try achieving different distributions by just specifying the target** (or explore changing the board parameters by **adjusting the peg probabilities** to achieve different distributions).
 
+For this, we have summarized our work into a draft that can be published as a pre-print follow-up to the *Universal Statistical Simulator* work. We decided to name it:  
+**Quantum Monte Carlo Simulation of Various Statistical Distributions via Multi-Dimensional Variational Galton Board on Simulated and Real Quantum Devices**,  
+and it can be found through the following link.
 
-The scoop of our study and our work can be summrized in the follwoing:
-Quantum Monte Carlo Simulation of Various Statistical Distributions via Multi-Dimensional Variational Galton Board on Simulated and Real Quantum Devices
+
+
 
 
 
