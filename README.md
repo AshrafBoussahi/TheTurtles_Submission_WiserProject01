@@ -46,7 +46,7 @@ Thank you for reviewing our work. Enjoy reading :)))
 
 - Added **variational methods** to find optimal parameters for target distributions.
   
-- Summarized all our findings into a research-paper-like file
+- Create a website-like implementation of the package (only the front end with some simulation) here
 
 
 ---
@@ -66,9 +66,6 @@ We have also generalized and proved that the architecture from the USS paper can
 
 Our package also includes **several variational (numerical) methods** that help deduce the right parameters for the Quantum Galton Board to simulate different statistical distributions, giving the user the **ability to try achieving different distributions by just specifying the target** (or explore changing the board parameters by **adjusting the peg probabilities** to achieve different distributions).
 
-For this, we have summarized our work into a draft that can be published as a pre-print follow-up to the *Universal Statistical Simulator* work. We decided to name it:  
-**Quantum Monte Carlo Simulation of Various Statistical Distributions via Multi-Dimensional Variational Galton Board on Simulated and Real Quantum Devices**, and it can be found through the following link.
-
 ---
 ## Reporting on the project tasks 🐢
 
@@ -82,7 +79,10 @@ You can download it using the following command:
 pip install QGBx
 ```
 
-#### 1. Reviewing the Universal Statistical Simulator paper
+#### Task 01 [here](./)
+#### Task 02 [here](./)
+#### Task 03 [here](./)
+#### Task 04[here](./)
 
 
 
